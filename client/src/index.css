@@ -1,6 +1,6 @@
 body {
   font-family: system-ui, sans-serif;
-  max-width: 360px;
+  max-width: 480px;
   margin: 60px auto;
   padding: 0 16px;
 }
@@ -26,4 +26,65 @@ button {
 .error {
   color: crimson;
   margin: 0;
+}
+
+textarea {
+  padding: 8px;
+  font-size: 16px;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.notes {
+  list-style: none;
+  padding: 0;
+}
+
+.notes li {
+  border: 1px solid #ccc;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.notes h3 {
+  margin: 0 0 4px;
+}
+
+/* Show only the first 3 lines of a note, then "..." */
+.notes p {
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #ccc;
+}
+
+.navbar a {
+  text-decoration: none;
+}
+
+.navbar a.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.navbar button {
+  margin-left: auto;
 }

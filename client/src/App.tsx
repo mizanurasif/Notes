@@ -1,22 +1,24 @@
-import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import Home from './pages/Home'
+import ProtectedLayout from './components/ProtectedLayout'
+import CreateNote from './pages/CreateNote'
 import Login from './pages/Login'
+import Notes from './pages/Notes'
 import Register from './pages/Register'
-
-// Only allow access to a page when a token exists
-function Protected({ children }: { children: ReactNode }) {
-  return localStorage.getItem('token') ? children : <Navigate to="/login" replace />
-}
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Protected><Home /></Protected>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/* Logged-in pages share the navbar */}
+        <Route element={<ProtectedLayout />}>
+          <Route path="/notes" element={<Notes />} />
+          <Route path="/notes/new" element={<CreateNote />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/notes" replace />} />
       </Routes>
     </BrowserRouter>
   )
