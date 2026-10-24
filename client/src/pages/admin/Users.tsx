@@ -2,7 +2,7 @@ import { useActionState, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api, { getErrorMessage } from '../../api'
 import { getCurrentUser } from '../../auth'
-import { USERLIST_LIMIT } from '../../limits'
+import { PASSWORD_MIN_LENGTH, USERLIST_LIMIT } from '../../limits'
 import { parseInterests } from '../../interests'
 
 interface User {
@@ -116,7 +116,7 @@ function Users() {
         <form action={createAction} className="card">
           <input name="username" placeholder="Username" defaultValue={createState.username} required />
           <input name="email" type="email" placeholder="Email" defaultValue={createState.email} required />
-          <input name="password" type="password" placeholder="Password" minLength={6} required />
+          <input name="password" type="password" placeholder="Password" minLength={PASSWORD_MIN_LENGTH} required />
           <select name="role" defaultValue={createState.role}>
             <option value="user">user</option>
             <option value="admin">admin</option>
@@ -138,7 +138,7 @@ function Users() {
                 <input name="username" defaultValue={user.username} required />
                 <input name="email" type="email" defaultValue={user.email} required />
                 <input name="interests" defaultValue={user.interests.join(', ')} placeholder="Interests, comma separated" />
-                <input name="password" type="password" placeholder="New password (optional)" minLength={6} />
+                <input name="password" type="password" placeholder="New password (optional)" minLength={PASSWORD_MIN_LENGTH} />
                 <select name="role" defaultValue={user.role} disabled={user._id === me?.id}>
                   <option value="user">user</option>
                   <option value="admin">admin</option>

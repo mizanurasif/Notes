@@ -9,3 +9,6 @@ export const INTEREST_MAX_LENGTH = 30
 // Keep in sync with the Post schema on the server
 export const POST_TITLE_MAX = 200
 export const POST_BODY_MAX = 5000
+
+// Keep in sync with server/src/utils/passwordPolicy.ts
+export const PASSWORD_MIN_LENGTH = 8

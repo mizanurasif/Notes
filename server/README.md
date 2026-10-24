@@ -36,6 +36,7 @@ Generate a secret: `node -e "console.log(require('crypto').randomBytes(48).toStr
 - **Sliding renewal**: once less than half the lifetime is left, the response carries a fresh token in `X-New-Token` (the user's current role is re-read from the DB, so role changes and deleted users are picked up). Idle for 30 min → logged out.
 - `requireRole("admin")` guards every `/api/admin` route (401 without a token, 403 for non-admins).
 - Passwords are hashed with bcrypt in a `pre("save")` hook and the field is `select: false`, so it never leaves the DB by accident.
+- **Password rule** (`utils/passwordPolicy.ts`): at least 8 characters and not on a list of very common passwords (`12345678`, `password1`, `admin123`, ... case-insensitive). Enforced by the User schema, so register, admin create/update and `seed:admin` all follow it. It only applies when a password is set, so existing accounts can still log in.
 - API responses send `Cache-Control: no-store` and no ETag: they depend on who is logged in, so browsers must not cache them.
 
 ## API

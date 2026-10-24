@@ -1,6 +1,7 @@
 import { useActionState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api, { getErrorMessage } from '../api'
+import { PASSWORD_MIN_LENGTH } from '../limits'
 
 interface RegisterState {
   error: string
@@ -43,7 +44,8 @@ function Register() {
       </label>
       <label>
         Password
-        <input name="password" type="password" minLength={6} required />
+        <input name="password" type="password" minLength={PASSWORD_MIN_LENGTH} required />
+        <small>At least {PASSWORD_MIN_LENGTH} characters, not a common password</small>
       </label>
       {state.error && <p className="error">{state.error}</p>}
       <button type="submit" disabled={isPending}>

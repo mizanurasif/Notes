@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { User } from "../models/User.js";
 import { StatusCodes } from "http-status-codes";
 import { signToken } from "../utils/token.js";
+import { checkPassword } from "../utils/passwordPolicy.js";
 
 export async function register(req: Request, res: Response) {
   const { username, email, password } = req.body;
@@ -10,8 +11,13 @@ export async function register(req: Request, res: Response) {
   if (!username || !email || !password) {
     return res.status(StatusCodes.BAD_REQUEST).json({ message: "Username, email and password are required" });
   }
-  if (password.length < 6) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Password must be at least 6 characters" });
+  if (typeof password !== "string") {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Password must be text" });
+  }
+  // Same rule as the User schema (min length + not a common password)
+  const passwordError = checkPassword(password);
+  if (passwordError) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: passwordError });
   }
 
   const exists = await User.exists({ $or: [{ email: email.toLowerCase() }, { username }] });

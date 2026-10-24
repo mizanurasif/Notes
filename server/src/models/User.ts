@@ -1,5 +1,6 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 import bcrypt from "bcryptjs";
+import { checkPassword } from "../utils/passwordPolicy.js";
 
 export const MAX_INTERESTS = 10;
 export const INTEREST_MAX_LENGTH = 30;
@@ -11,7 +12,12 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters"],
+      // Runs on the plain-text password, before the pre("save") hook hashes it
+      // (and only when the password is set or changed)
+      validate: {
+        validator: (value: string) => checkPassword(value) === null,
+        message: (props: { value: string }) => checkPassword(props.value) ?? "Invalid password",
+      },
       select: false,
     },
     role: {
