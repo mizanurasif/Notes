@@ -1,7 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+import { getCurrentUser } from '../auth'
 
 function Navbar() {
   const navigate = useNavigate()
+  const isAdmin = getCurrentUser()?.role === 'admin'
 
   function logout() {
     localStorage.removeItem('token')
@@ -14,6 +16,7 @@ function Navbar() {
         All Notes
       </NavLink>
       <NavLink to="/notes/new">Create</NavLink>
+      {isAdmin && <NavLink to="/admin/users">Users</NavLink>}
       <button onClick={logout}>Logout</button>
     </nav>
   )

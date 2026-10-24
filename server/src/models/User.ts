@@ -3,10 +3,19 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new Schema(
   {
-    username: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, lowercase: true },
-    password: { type: String, required: true, minlength: 6, select: false },
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    username: { type: String, required: [true, "Username is required"], trim: true },
+    email: { type: String, required: [true, "Email is required"], trim: true, lowercase: true },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters"],
+      select: false,
+    },
+    role: {
+      type: String,
+      enum: { values: ["user", "admin"], message: "Role must be user or admin" },
+      default: "user",
+    },
     interests: { type: [String], default: [] },
   },
   { timestamps: true }

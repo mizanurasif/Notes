@@ -1,9 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import AdminRoute from './components/AdminRoute'
 import ProtectedLayout from './components/ProtectedLayout'
 import CreateNote from './pages/CreateNote'
 import Login from './pages/Login'
 import Notes from './pages/Notes'
 import Register from './pages/Register'
+import UserNotes from './pages/admin/UserNotes'
+import Users from './pages/admin/Users'
 
 function App() {
   return (
@@ -16,6 +19,12 @@ function App() {
         <Route element={<ProtectedLayout />}>
           <Route path="/notes" element={<Notes />} />
           <Route path="/notes/new" element={<CreateNote />} />
+
+          {/* Admin only */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin/users" element={<Users />} />
+            <Route path="/admin/users/:userId" element={<UserNotes />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/notes" replace />} />
