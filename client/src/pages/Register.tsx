@@ -1,53 +1,53 @@
-import { useState, type FormEvent } from 'react'
+import { useActionState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api, { getErrorMessage } from '../api'
 
+interface RegisterState {
+  error: string
+  username: string
+  email: string
+}
+
 function Register() {
   const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      await api.post('/auth/register', { username, email, password })
-      navigate('/login')
-    } catch (err) {
-      setError(getErrorMessage(err))
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [state, formAction, isPending] = useActionState(
+    async (_prev: RegisterState, formData: FormData): Promise<RegisterState> => {
+      const username = String(formData.get('username'))
+      const email = String(formData.get('email'))
+      const password = String(formData.get('password'))
+      try {
+        await api.post('/auth/register', { username, email, password })
+        // Drop any previous session so the next screen can't show the old account
+        localStorage.removeItem('token')
+        navigate('/login')
+        return { error: '', username, email }
+      } catch (err) {
+        // Return the typed values so the fields keep them after React resets the form
+        return { error: getErrorMessage(err), username, email }
+      }
+    },
+    { error: '', username: '', email: '' },
+  )
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form action={formAction}>
       <h1>Register</h1>
       <label>
         Username
-        <input value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <input name="username" defaultValue={state.username} required />
       </label>
       <label>
         Email
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input name="email" type="email" defaultValue={state.email} required />
       </label>
       <label>
         Password
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          minLength={6}
-          required
-        />
+        <input name="password" type="password" minLength={6} required />
       </label>
-      {error && <p className="error">{error}</p>}
-      <button type="submit" disabled={loading}>
-        {loading ? 'Registering...' : 'Register'}
+      {state.error && <p className="error">{state.error}</p>}
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Registering...' : 'Register'}
       </button>
       <p>
         Already have an account? <Link to="/login">Login</Link>

@@ -1,16 +1,8 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt, { type SignOptions } from "jsonwebtoken";
 import { User } from "../models/User.js";
 import { StatusCodes } from "http-status-codes";
-
-function signToken(id: string, role: string) {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET is not set in .env");
-
-  const expiresIn = (process.env.JWT_EXPIRES_IN || "30m") as SignOptions["expiresIn"];
-  return jwt.sign({ id, role }, secret, { expiresIn });
-}
+import { signToken } from "../utils/token.js";
 
 export async function register(req: Request, res: Response) {
   const { username, email, password } = req.body;
