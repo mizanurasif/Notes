@@ -1,4 +1,4 @@
-import { useActionState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api, { getErrorMessage } from '../api'
 
@@ -9,6 +9,12 @@ interface LoginState {
 
 function Login() {
   const navigate = useNavigate()
+
+  // Why the user was sent here (set by the 401 handler in api.ts); shown once
+  const [logoutReason] = useState(() => sessionStorage.getItem('logoutReason'))
+  useEffect(() => {
+    sessionStorage.removeItem('logoutReason')
+  }, [])
 
   const [state, formAction, isPending] = useActionState(
     async (_prev: LoginState, formData: FormData): Promise<LoginState> => {
@@ -30,6 +36,7 @@ function Login() {
   return (
     <form action={formAction}>
       <h1>Login</h1>
+      {logoutReason && <p className="error">You were logged out ({logoutReason}). Please log in again.</p>}
       <label>
         Username or Email
         <input name="identifier" defaultValue={state.identifier} required />

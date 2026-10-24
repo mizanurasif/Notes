@@ -18,6 +18,8 @@ function Register() {
       const password = String(formData.get('password'))
       try {
         await api.post('/auth/register', { username, email, password })
+        // Drop any previous session so the next screen can't show the old account
+        localStorage.removeItem('token')
         navigate('/login')
         return { error: '', username, email }
       } catch (err) {

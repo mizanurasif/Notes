@@ -2,13 +2,16 @@ import { Router } from "express";
 import { auth, requireRole } from "../middleware/auth.js";
 import {
   createUser,
+  createUserNote,
   deleteUser,
+  deleteUserNote,
   getUser,
+  listUserNotes,
   listUsers,
   loadUserParam,
   updateUser,
+  updateUserNote,
 } from "../controllers/admin.controller.js";
-import { createNote, deleteNote, listNotes, updateNote } from "../controllers/note.controller.js";
 
 const router = Router();
 
@@ -25,10 +28,10 @@ router.get("/users/:userId", getUser);
 router.put("/users/:userId", updateUser);
 router.delete("/users/:userId", deleteUser);
 
-// A user's notes: same controllers as /api/notes, but for :userId instead of the logged-in admin
-router.get("/users/:userId/notes", listNotes);
-router.post("/users/:userId/notes", createNote);
-router.put("/users/:userId/notes/:id", updateNote);
-router.delete("/users/:userId/notes/:id", deleteNote);
+// A user's notes (admin controllers, separate from /api/notes)
+router.get("/users/:userId/notes", listUserNotes);
+router.post("/users/:userId/notes", createUserNote);
+router.put("/users/:userId/notes/:noteId", updateUserNote);
+router.delete("/users/:userId/notes/:noteId", deleteUserNote);
 
 export default router;

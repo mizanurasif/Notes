@@ -5,6 +5,7 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import noteRoutes from "./routes/note.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import userRoutes from "./routes/user.routes.js";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 
@@ -15,10 +16,19 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ exposedHeaders: ["X-New-Token"] }));
 app.use(express.json());
 
+// API responses depend on who is logged in (and may carry X-New-Token), so they must never be
+// cached or answered with 304: a cached response could hand one user's token to another session.
+app.set("etag", false);
+app.use("/api", (_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/users", userRoutes);
 
 // Catches errors thrown inside routes (Express 5 forwards async errors here)
 app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {

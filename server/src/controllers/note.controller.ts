@@ -4,29 +4,23 @@ import { StatusCodes } from "http-status-codes";
 import { Note } from "../models/Note.js";
 import { getPagination } from "../utils/pagination.js";
 
+// Normal-user note routes: always work on the logged-in user's own notes (req.user.id).
+// Admin access to other users' notes lives in admin.controller.ts.
+
 // Only the fields the client needs (_id is always included)
 const NOTE_FIELDS = "title content";
 
-// Whose notes to work on: admin routes pass :userId, normal routes always use the logged-in user.
-// (:userId only exists on admin routes, which are protected by requireRole("admin"))
-function getOwnerId(req: Request): string | undefined {
-  const { userId } = req.params as { userId?: string };
-  return userId ?? req.user?.id;
-}
-
 // GET /api/notes?page=1&limit=5
-// GET /api/admin/users/:userId/notes
-export async function listNotes(req: Request, res: Response) {
+export async function listMyNotes(req: Request, res: Response) {
   const { page, limit, skip } = getPagination(req);
 
-  const ownerId = getOwnerId(req);
-  if (!ownerId) {
+  if (!req.user) {
     return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Not logged in" });
   }
 
   const [notes, total] = await Promise.all([
-    Note.find({ owner: ownerId }).select(NOTE_FIELDS).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
-    Note.countDocuments({ owner: ownerId }),
+    Note.find({ owner: req.user.id }).select(NOTE_FIELDS).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
+    Note.countDocuments({ owner: req.user.id }),
   ]);
   console.log("listMyNotes")
   console.log(notes)
@@ -34,7 +28,6 @@ export async function listNotes(req: Request, res: Response) {
 }
 
 // POST /api/notes
-// POST /api/admin/users/:userId/notes
 export async function createNote(req: Request, res: Response) {
   const { title, content } = req.body;
   //Express caps the request size at 100 KB. express.json() has a default limit: "100kb
@@ -44,11 +37,10 @@ export async function createNote(req: Request, res: Response) {
   if (content !== undefined && typeof content !== "string") {
     return res.status(StatusCodes.BAD_REQUEST).json({ message: "Content must be text" });
   }
-  const ownerId = getOwnerId(req);
-  if (!ownerId) {
+  if (!req.user) {
     return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Not logged in" });
   }
-  const note = await Note.create({ title, content, owner: ownerId });
+  const note = await Note.create({ title, content, owner: req.user.id });
   console.log("created")
   console.log(note)
   res.status(StatusCodes.CREATED).json({
@@ -57,13 +49,11 @@ export async function createNote(req: Request, res: Response) {
 }
 
 // PUT /api/notes/:id
-// PUT /api/admin/users/:userId/notes/:id
 export async function updateNote(req: Request, res: Response) {
   const { id } = req.params;
   const { title, content } = req.body;
 
-  const ownerId = getOwnerId(req);
-  if (!ownerId) {
+  if (!req.user) {
     return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Not logged in" });
   }
   if (title !== undefined && (typeof title !== "string" || !title.trim())) {
@@ -77,7 +67,7 @@ export async function updateNote(req: Request, res: Response) {
   }
   // Matching on owner too means users can only update their own notes
   const note = await Note.findOneAndUpdate(
-    { _id: id, owner: ownerId },
+    { _id: id, owner: req.user.id },
     { title, content },
     { returnDocument: "after", runValidators: true, projection: NOTE_FIELDS, lean: true }
   );
@@ -91,12 +81,10 @@ export async function updateNote(req: Request, res: Response) {
 }
 
 // DELETE /api/notes/:id
-// DELETE /api/admin/users/:userId/notes/:id
 export async function deleteNote(req: Request, res: Response) {
   const { id } = req.params;
 
-  const ownerId = getOwnerId(req);
-  if (!ownerId) {
+  if (!req.user) {
     return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Not logged in" });
   }
   if (!isValidObjectId(id)) {
@@ -104,7 +92,7 @@ export async function deleteNote(req: Request, res: Response) {
   }
 
   // Matching on owner too means users can only delete their own notes
-  const result = await Note.deleteOne({ _id: id, owner: ownerId });
+  const result = await Note.deleteOne({ _id: id, owner: req.user.id });
 
   if (result.deletedCount === 0) {
     return res.status(StatusCodes.NOT_FOUND).json({ message: "Note not found" });

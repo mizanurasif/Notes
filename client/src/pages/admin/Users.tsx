@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom'
 import api, { getErrorMessage } from '../../api'
 import { getCurrentUser } from '../../auth'
 import { USERLIST_LIMIT } from '../../limits'
+import { parseInterests } from '../../interests'
 
 interface User {
   _id: string
   username: string
   email: string
   role: 'user' | 'admin'
+  interests: string[]
 }
 
 interface UsersResponse {
@@ -78,6 +80,7 @@ function Users() {
       const res = await api.put<{ user: User }>(`/admin/users/${editingId}`, {
         username: String(formData.get('username') ?? '').trim(),
         email: String(formData.get('email') ?? '').trim(),
+        interests: parseInterests(String(formData.get('interests') ?? '')),
         ...(role && { role }),
         // Empty = keep the current password
         ...(password && { password }),
@@ -134,6 +137,7 @@ function Users() {
               <form action={handleUpdate}>
                 <input name="username" defaultValue={user.username} required />
                 <input name="email" type="email" defaultValue={user.email} required />
+                <input name="interests" defaultValue={user.interests.join(', ')} placeholder="Interests, comma separated" />
                 <input name="password" type="password" placeholder="New password (optional)" minLength={6} />
                 <select name="role" defaultValue={user.role} disabled={user._id === me?.id}>
                   <option value="user">user</option>
@@ -154,6 +158,7 @@ function Users() {
                 {user.role === 'admin' && <span className="badge">admin</span>}
               </h3>
               <p>{user.email}</p>
+              {user.interests.length > 0 && <p>Interests: {user.interests.join(', ')}</p>}
               <div className="row">
                 <button onClick={() => setEditingId(user._id)}>Edit</button>
                 {/* The server also blocks deleting yourself */}

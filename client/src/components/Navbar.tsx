@@ -16,6 +16,8 @@ function Navbar() {
         All Notes
       </NavLink>
       <NavLink to="/notes/new">Create</NavLink>
+      <NavLink to="/interests">Interests</NavLink>
+      <NavLink to="/profile">Profile</NavLink>
       {isAdmin && <NavLink to="/admin/users">Users</NavLink>}
       <button onClick={logout}>Logout</button>
     </nav>
