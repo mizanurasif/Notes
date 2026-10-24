@@ -22,8 +22,6 @@ export async function listMyNotes(req: Request, res: Response) {
     Note.find({ owner: req.user.id }).select(NOTE_FIELDS).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
     Note.countDocuments({ owner: req.user.id }),
   ]);
-  console.log("listMyNotes")
-  console.log(notes)
   res.json({ notes, page, limit, total, totalPages: Math.ceil(total / limit) });
 }
 
@@ -41,8 +39,6 @@ export async function createNote(req: Request, res: Response) {
     return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Not logged in" });
   }
   const note = await Note.create({ title, content, owner: req.user.id });
-  console.log("created")
-  console.log(note)
   res.status(StatusCodes.CREATED).json({
     note: { _id: note._id, title: note.title, content: note.content },
   });
@@ -75,8 +71,6 @@ export async function updateNote(req: Request, res: Response) {
   if (!note) {
     return res.status(StatusCodes.NOT_FOUND).json({ message: "Note not found" });
   }
-  console.log("updated")
-  console.log(note)
   res.json({ note });
 }
 

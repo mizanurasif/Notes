@@ -7,7 +7,9 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "seed:admin": "tsx src/scripts/seedAdmin.ts"
+    "seed:admin": "tsx src/scripts/seedAdmin.ts",
+    "test": "jest -c tests/jest.config.cjs --runInBand",
+    "audit:indexes": "tsx tests/audit/indexAudit.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +29,9 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.5",
+    "jest": "^30.5.2",
+    "mongodb-memory-server-core": "^11.3.0",
+    "supertest": "^7.3.1",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }

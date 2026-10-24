@@ -28,7 +28,6 @@ export async function auth(req: Request, res: Response, next: NextFunction) {
   let payload: AuthUser & JwtPayload;
   try {
     payload = jwt.verify(header.slice(7), process.env.JWT_SECRET!) as AuthUser & JwtPayload;
-    console.log(payload)
   } catch {
     return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid or expired token" });
   }
@@ -54,10 +53,22 @@ export async function auth(req: Request, res: Response, next: NextFunction) {
 
 // Use after auth: only lets the given role through
 export function requireRole(role: AuthUser["role"]) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    // The token's role can be up to 15 min old, so a wrong role is rejected without a DB read...
     if (req.user?.role !== role) {
       return res.status(StatusCodes.FORBIDDEN).json({ message: "Forbidden" });
     }
+
+    // ...and a matching one is confirmed against the DB (by _id index), so a demoted or
+    // deleted admin loses access immediately instead of at the next token renewal
+    const user = await User.findById(req.user.id).select("role").lean();
+    if (!user) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "User no longer exists" });
+    }
+    if (user.role !== role) {
+      return res.status(StatusCodes.FORBIDDEN).json({ message: "Forbidden" });
+    }
+    req.user.role = user.role;
     next();
   };
 }
