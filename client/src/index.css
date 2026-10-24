@@ -53,13 +53,21 @@ textarea {
   margin: 12px 0;
 }
 
+/* Long titles: break words that have no spaces, show at most 3 lines, then "..." */
 .notes h3 {
   margin: 0 0 4px;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
 
 /* Show only the first 3 lines of a note, then "..." */
 .notes p {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -132,4 +140,18 @@ select {
   background: none;
   cursor: pointer;
   font-size: 16px;
+}
+
+small {
+  color: #888;
+}
+
+/* One note in full: no clamp, but still wrap very long words */
+.note-detail h1,
+.note-detail p {
+  overflow-wrap: anywhere;
+}
+
+.note-detail p {
+  white-space: pre-wrap;
 }

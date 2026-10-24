@@ -3,6 +3,7 @@ import { isValidObjectId } from "mongoose";
 import { StatusCodes } from "http-status-codes";
 import { User } from "../models/User.js";
 import { Note } from "../models/Note.js";
+import { Post } from "../models/Post.js";
 import { getPagination } from "../utils/pagination.js";
 
 // Never send the password hash (it's select: false anyway)
@@ -74,7 +75,7 @@ export async function updateUser(req: Request, res: Response) {
   res.json({ user: toUserResponse(user) });
 }
 
-// DELETE /api/admin/users/:userId  (also deletes their notes)
+// DELETE /api/admin/users/:userId  (also deletes their notes and posts)
 export async function deleteUser(req: Request, res: Response) {
   const { userId } = req.params as { userId: string };
 
@@ -82,8 +83,12 @@ export async function deleteUser(req: Request, res: Response) {
     return res.status(StatusCodes.BAD_REQUEST).json({ message: "You cannot delete yourself" });
   }
 
-  // deleteMany({ owner }) uses the { owner, _id } index
-  await Promise.all([User.deleteOne({ _id: userId }), Note.deleteMany({ owner: userId })]);
+  // deleteMany uses the { owner, _id } and { author, _id } indexes
+  await Promise.all([
+    User.deleteOne({ _id: userId }),
+    Note.deleteMany({ owner: userId }),
+    Post.deleteMany({ author: userId }),
+  ]);
   res.status(StatusCodes.NO_CONTENT).end();
 }
 
@@ -167,4 +172,19 @@ export async function deleteUserNote(req: Request, res: Response) {
     return res.status(StatusCodes.NOT_FOUND).json({ message: "Note not found" });
   }
   res.status(StatusCodes.NO_CONTENT).end();
+}
+
+// GET /api/admin/users/:userId/notes/:noteId  (one note of :userId, full title and content)
+export async function getUserNote(req: Request, res: Response) {
+  const { userId, noteId } = req.params as { userId: string; noteId: string };
+
+  if (!isValidObjectId(noteId)) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Note not found" });
+  }
+
+  const note = await Note.findOne({ _id: noteId, owner: userId }).select(NOTE_FIELDS).lean();
+  if (!note) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Note not found" });
+  }
+  res.json({ note });
 }

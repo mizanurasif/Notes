@@ -6,6 +6,7 @@ import {
   deleteUser,
   deleteUserNote,
   getUser,
+  getUserNote,
   listUserNotes,
   listUsers,
   loadUserParam,
@@ -31,6 +32,7 @@ router.delete("/users/:userId", deleteUser);
 // A user's notes (admin controllers, separate from /api/notes)
 router.get("/users/:userId/notes", listUserNotes);
 router.post("/users/:userId/notes", createUserNote);
+router.get("/users/:userId/notes/:noteId", getUserNote);
 router.put("/users/:userId/notes/:noteId", updateUserNote);
 router.delete("/users/:userId/notes/:noteId", deleteUserNote);
 

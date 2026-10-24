@@ -1,4 +1,5 @@
 import { useActionState, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import api, { getErrorMessage } from '../api'
 import { CONTENT_MAX, TITLE_MAX } from '../limits'
 
@@ -22,7 +23,8 @@ interface CreateState {
 }
 
 interface NoteListProps {
-  // "/notes" for your own notes, "/admin/users/:id/notes" for an admin managing a user's notes
+  // "/notes" for your own notes, "/admin/users/:id/notes" for an admin managing a user's notes.
+  // The page that shows one note in full has the same path: `${basePath}/${noteId}`
   basePath: string
   // Show an "add note" form above the list
   showCreate?: boolean
@@ -133,7 +135,9 @@ function NoteList({ basePath, showCreate = false }: NoteListProps) {
             </li>
           ) : (
             <li key={note._id}>
-              <h3>{note.title}</h3>
+              <h3>
+                <Link to={`${basePath}/${note._id}`}>{note.title}</Link>
+              </h3>
               <p>{note.content}</p>
               <div className="row">
                 <button onClick={() => setEditingId(note._id)}>Edit</button>

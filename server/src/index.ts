@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js";
 import noteRoutes from "./routes/note.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import postRoutes from "./routes/post.routes.js";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 
@@ -29,6 +30,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
 
 // Catches errors thrown inside routes (Express 5 forwards async errors here)
 app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {

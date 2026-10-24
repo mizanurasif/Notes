@@ -99,3 +99,19 @@ export async function deleteNote(req: Request, res: Response) {
   }
   res.status(StatusCodes.NO_CONTENT).end();
 }
+
+// GET /api/notes/:id  (one of your own notes, full title and content)
+export async function getNote(req: Request, res: Response) {
+  const { id } = req.params as { id: string };
+
+  if (!isValidObjectId(id)) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Note not found" });
+  }
+
+  // { _id, owner }: found by the _id index; owner makes sure it's your note
+  const note = await Note.findOne({ _id: id, owner: req.user!.id }).select(NOTE_FIELDS).lean();
+  if (!note) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Note not found" });
+  }
+  res.json({ note });
+}
